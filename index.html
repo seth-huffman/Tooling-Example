@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Asset Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel: Preview -->
+        <div class="panel left-panel">
+            <h1>SVG Converter</h1>
+            <div id="theme-toggle">
+                <button id="toggle-day" class="toggle-btn active">Day</button>
+                <button id="toggle-night" class="toggle-btn">Night</button>
+            </div>
+            <div id="mode-toggle">
+                <button id="toggle-single" class="mode-btn active">Single Color</button>
+                <button id="toggle-multi" class="mode-btn">Multi Color</button>
+            </div>
+            <div id="preview-area">
+                <p class="placeholder-text">Your SVG variants will appear here</p>
+                <div id="preview-list"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Controls -->
+        <div class="panel right-panel">
+            <h2>Upload SVGs</h2>
+
+            <!-- Drop Zone -->
+            <div id="drop-zone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & drop SVGs here</p>
+                <p class="sub">or click to select files (multiple allowed)</p>
+                <input type="file" id="file-input" accept=".svg" multiple hidden>
+            </div>
+
+            <!-- Queued assets list -->
+            <div id="asset-list" class="hidden">
+                <h3>Assets <span id="asset-count"></span></h3>
+                <ul id="asset-items"></ul>
+                <button id="clear-all-btn" class="btn-secondary">Clear All</button>
+            </div>
+
+            <!-- Options -->
+            <div id="options-section" class="hidden">
+                <h3>Options</h3>
+                <label class="checkbox-row">
+                    <input type="checkbox" id="include-automation">
+                    <span>Include Automation variants</span>
+                </label>
+            </div>
+
+            <!-- GitHub Settings -->
+            <div id="github-section" class="hidden">
+                <h3>GitHub Settings</h3>
+
+                <div class="form-group">
+                    <label for="committer-name">Your Name:</label>
+                    <input type="text" id="committer-name" placeholder="Jane Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="commit-message">Commit Message:</label>
+                    <input type="text" id="commit-message" placeholder="Add SVG assets">
+                </div>
+
+                <div class="form-group">
+                    <label for="branch-name">Branch:</label>
+                    <input type="text" id="branch-name" value="main" placeholder="main">
+                </div>
+
+                <button id="upload-btn" disabled>Upload to GitHub</button>
+                <!-- Status -->
+                <div id="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
