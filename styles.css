@@ -181,6 +181,10 @@ h2 {
     background: #f0f0f0;
 }
 
+.preview-card.pink-bg .svg-container {
+    background: #f0f0f0;
+}
+
 .preview-card.night-bg .svg-container {
     background: #1a2e18;
 }

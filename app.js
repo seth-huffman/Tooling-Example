@@ -15,6 +15,13 @@
         { suffix: 'night-editable', label: 'Editable',   color: '#00a6d0', mode: 'night', bgClass: 'night-bg' },
         { suffix: 'night-flat',     label: 'Flat',       color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
         { suffix: 'night-secondary',label: 'Secondary',  color: '#00bb0c', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'pink-enabled',  label: 'Enabled',    color: '#ff00e1', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-disabled', label: 'Disabled',   color: '#a779a1', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-checked',  label: 'Checked',    color: '#ff86f1', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-pressed',  label: 'Pressed',    color: '#800171', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-editable', label: 'Editable',   color: '#5d2a57', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-flat',     label: 'Flat',       color: '#b600a0', mode: 'pink', bgClass: 'pink-bg' },
+        { suffix: 'pink-secondary',label: 'Secondary',  color: '#940083', mode: 'pink', bgClass: 'pink-bg' },
     ];
 
     // DOM Elements
@@ -33,6 +40,7 @@
     const customFolderInput = document.getElementById('custom-folder');
     const folderSelect      = document.getElementById('folder-path');
     const toggleDayBtn      = document.getElementById('toggle-day');
+    const togglePinkBtn     = document.getElementById('toggle-pink');
     const toggleNightBtn    = document.getElementById('toggle-night');
     const toggleSingleBtn   = document.getElementById('toggle-single');
     const toggleMultiBtn    = document.getElementById('toggle-multi');
@@ -46,6 +54,15 @@
     toggleDayBtn.addEventListener('click', () => {
         activeMode = 'day';
         toggleDayBtn.classList.add('active');
+        togglePinkBtn.classList.remove('active');
+        toggleNightBtn.classList.remove('active');
+        generatePreviews();
+    });
+
+    togglePinkBtn.addEventListener('click', () => {
+        activeMode = 'pink';
+        togglePinkBtn.classList.add('active');
+        toggleDayBtn.classList.remove('active');
         toggleNightBtn.classList.remove('active');
         generatePreviews();
     });
@@ -53,6 +70,7 @@
     toggleNightBtn.addEventListener('click', () => {
         activeMode = 'night';
         toggleNightBtn.classList.add('active');
+        togglePinkBtn.classList.remove('active');
         toggleDayBtn.classList.remove('active');
         generatePreviews();
     });
@@ -340,6 +358,7 @@
         const total = filesToUpload.length;
 
         try {
+            const filesToUpload = ['day', 'pink', 'night'];
             for (const file of filesToUpload) {
                 setStatus(`Uploading… ${uploaded + 1}/${total}: ${file.filename}`, 'info');
                 await uploadToGitHub(token, owner, repo, branch, folder, file.filename, file.content, commitMessage, committerName);
