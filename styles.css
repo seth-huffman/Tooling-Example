@@ -21,7 +21,6 @@ body {
 .left-panel {
     flex: 1;
     background: #111a10;
-    border-right: 1px solid #253d22;
     display: flex;
     flex-direction: column;
 }
@@ -126,9 +125,8 @@ h2 {
 }
 
 .mode-btn.active {
-    background: #FFDE00;
-    color: #1a1a1a;
-    border-color: #FFDE00;
+    background: #64965e;
+    color: #111a10;
 }
 
 .mode-btn:hover:not(.active) {
@@ -158,9 +156,9 @@ h2 {
 }
 
 .toggle-btn.active {
-    background: #367C2B;
-    color: #FFDE00;
-    border-color: #367C2B;
+    background: #64965e;
+    color: #111a10;
+    border-color: #64965e;
 }
 
 .toggle-btn:hover:not(.active) {
@@ -171,7 +169,6 @@ h2 {
 /* Preview cards */
 .preview-card {
     background: #0d1117;
-    border: 1px solid #253d22;
     border-radius: 8px;
     padding: 10px;
     text-align: center;
@@ -186,7 +183,7 @@ h2 {
 }
 
 .preview-card.night-bg .svg-container {
-    background: #1a2e18;
+    background: #1a1919;
 }
 
 .preview-card .svg-container {
@@ -196,7 +193,6 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1 / 1;
     height: 100px;
 }
 
@@ -216,7 +212,7 @@ h2 {
 .right-panel {
     width: 420px;
     min-width: 380px;
-    background: #0d1117;
+    background: #0b110a;;
     padding: 20px 24px;
     overflow-y: auto;
     display: flex;
