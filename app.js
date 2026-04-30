@@ -2,21 +2,19 @@
     // Fixed variant definitions: suffix, color, mode background class
     const VARIANTS = [
         { suffix: 'day-enabled',    label: 'Enabled',    color: '#000000', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-disabled',   label: 'Disabled',   color: '#000000', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-checked',    label: 'Checked',    color: '#000000', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-pressed',    label: 'Pressed',    color: '#000000', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-editable',   label: 'Editable',   color: '#000000', mode: 'day',   bgClass: 'day-bg' },
+        { suffix: 'day-disabled',   label: 'Disabled',   color: '#444444', mode: 'day',   bgClass: 'day-bg' },
+        { suffix: 'day-checked',    label: 'Checked',    color: '#a6af00', mode: 'day',   bgClass: 'day-bg' },
+        { suffix: 'day-pressed',    label: 'Pressed',    color: '#00000054', mode: 'day',   bgClass: 'day-bg' },
+        { suffix: 'day-editable',   label: 'Editable',   color: '#027179', mode: 'day',   bgClass: 'day-bg' },
         { suffix: 'day-flat',       label: 'Flat',       color: '#FFFFFF', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-secondary',  label: 'Secondary',  color: '#FFFFFF', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'day-automation', label: 'Automation', color: '#1a237e', mode: 'day',   bgClass: 'day-bg' },
-        { suffix: 'night-enabled',  label: 'Enabled',    color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-disabled', label: 'Disabled',   color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-checked',  label: 'Checked',    color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-pressed',  label: 'Pressed',    color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-editable', label: 'Editable',   color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'day-secondary',  label: 'Secondary',  color: '#008809', mode: 'day',   bgClass: 'day-bg' },
+        { suffix: 'night-enabled',  label: 'Enabled',    color: '#000000', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'night-disabled', label: 'Disabled',   color: '#bebebe', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'night-checked',  label: 'Checked',    color: '#d9ff00', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'night-pressed',  label: 'Pressed',    color: '#ffffff7e', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'night-editable', label: 'Editable',   color: '#00a6d0', mode: 'night', bgClass: 'night-bg' },
         { suffix: 'night-flat',     label: 'Flat',       color: '#FFFFFF', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-secondary',label: 'Secondary',  color: '#000000', mode: 'night', bgClass: 'night-bg' },
-        { suffix: 'night-automation',label: 'Automation',color: '#64b5f6', mode: 'night', bgClass: 'night-bg' },
+        { suffix: 'night-secondary',label: 'Secondary',  color: '#00bb0c', mode: 'night', bgClass: 'night-bg' },
     ];
 
     // DOM Elements
