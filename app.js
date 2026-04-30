@@ -115,14 +115,11 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 const baseName = file.name.replace(/\.svg$/i, '');
-                // Avoid duplicate names
                 if (!assets.find((a) => a.baseName === baseName)) {
                     assets.push({ name: file.name, baseName, svgText: e.target.result });
                 }
                 loaded++;
-                if (loaded === svgFiles.length) {
-                    refreshUI();
-                }
+                if (loaded === svgFiles.length) refreshUI();
             };
             reader.readAsText(file);
         });
@@ -301,43 +298,58 @@
 
     // --- GitHub Upload ---
     uploadBtn.addEventListener('click', async () => {
-        const tokenEl      = document.getElementById('github-token');
-        const ownerEl      = document.getElementById('repo-owner');
-        const repoEl       = document.getElementById('repo-name');
-        const token        = tokenEl  ? tokenEl.value.trim()  : '';
-        const owner        = ownerEl  ? ownerEl.value.trim()  : '';
-        const repo         = repoEl   ? repoEl.value.trim()   : '';
-        const branch       = document.getElementById('branch-name').value.trim() || 'main';
-        const folder       = folderSelect ? folderSelect.value : '';
+        const token         = document.getElementById('github-token').value.trim();
+        const owner         = document.getElementById('repo-owner').value.trim();
+        const repo          = document.getElementById('repo-name').value.trim();
+        const branch        = document.getElementById('branch-name').value.trim() || 'main';
+        const folder        = folderSelect ? folderSelect.value : '';
         const commitMessage = document.getElementById('commit-message').value.trim();
         const committerName = document.getElementById('committer-name').value.trim();
 
+        if (!token || !owner || !repo) {
+            setStatus('Please fill in GitHub token, owner, and repository name.', 'error');
+            return;
+        }
+
+        // Build the list of files to upload based on the current color mode
+        const filesToUpload = [];
+        assets.forEach((asset) => {
+            if (colorMode === 'single') {
+                VARIANTS.forEach((variant) => {
+                    filesToUpload.push({
+                        filename: `${asset.baseName}_${variant.suffix}.svg`,
+                        content: recolorSvg(asset.svgText, variant.color),
+                    });
+                });
+            } else {
+                ['day', 'night'].forEach((mode) => {
+                    filesToUpload.push({
+                        filename: `${asset.baseName}_${mode}-enabled.svg`,
+                        content: asset.svgText,
+                    });
+                    filesToUpload.push({
+                        filename: `${asset.baseName}_${mode}-disabled.svg`,
+                        content: applyDisabledOpacity(asset.svgText),
+                    });
+                });
+            }
+        });
+
         uploadBtn.disabled = true;
-        let uploaded   = 0;
-        const totalFiles = assets.length * 2; // enabled + disabled per asset per mode
+        let uploaded = 0;
+        const total = filesToUpload.length;
 
         try {
-            // Multi-color: upload enabled and disabled for both day and night
-            const modes = ['day', 'night'];
-            for (const mode of modes) {
-                const bgSuffix = mode;
-                const enabledFilename  = `${asset.baseName}_${bgSuffix}-enabled.svg`;
-                await uploadToGitHub(token, owner, repo, branch, folder, enabledFilename, asset.svgText, commitMessage, committerName);
+            for (const file of filesToUpload) {
+                setStatus(`Uploading… ${uploaded + 1}/${total}: ${file.filename}`, 'info');
+                await uploadToGitHub(token, owner, repo, branch, folder, file.filename, file.content, commitMessage, committerName);
                 uploaded++;
-                setStatus(`Uploading... ${uploaded}/${totalFiles}`, 'info');
-
-                const disabledSvg      = applyDisabledOpacity(asset.svgText);
-                const disabledFilename = `${asset.baseName}_${bgSuffix}-disabled.svg`;
-                await uploadToGitHub(token, owner, repo, branch, folder, disabledFilename, disabledSvg, commitMessage, committerName);
-                uploaded++;
-                setStatus(`Uploading... ${uploaded}/${totalFiles}`, 'info');
             }
-
-            setStatus(`Successfully uploaded ${totalFiles} SVGs to ${owner}/${repo}/${folder}`, 'success');
+            setStatus(`Successfully uploaded ${total} SVG${total !== 1 ? 's' : ''} to ${owner}/${repo}/${folder || ''}`, 'success');
         } catch (err) {
-            setStatus(`Upload failed (${uploaded}/${totalFiles}): ${err.message}`, 'error');
+            setStatus(`Upload failed (${uploaded}/${total}): ${err.message}`, 'error');
         } finally {
-            uploadBtn.disabled = false;
+            uploadBtn.disabled = assets.length === 0;
         }
     });
 
