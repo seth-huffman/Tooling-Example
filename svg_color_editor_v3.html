@@ -1,5 +1,23 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Color Scheme Editor</title>
+</head>
+<body>
 <style>
+:root {
+  --color-background-primary: #161616;
+  --color-background-secondary: #1f1f1f;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #a8a8a8;
+  --color-text-tertiary: #5c5c5c;
+  --color-border-secondary: #3a3a3a;
+  --color-border-tertiary: #252525;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+html, body { height: 100%; background: var(--color-background-primary); color: var(--color-text-primary); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 #app { display: flex; flex-direction: column; min-height: 600px; position: relative; font-family: var(--font-mono); }
 #toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
@@ -416,3 +434,5 @@ function onFileChange(e){const f=e.target.files[0];if(f)readFile(f);}
 function readFile(f){const r=new FileReader();r.onload=ev=>loadSVG(ev.target.result);r.readAsText(f);}
 function loadFromPaste(){const v=document.getElementById('paste-area').value.trim();if(v.includes('<svg'))loadSVG(v);else alert('Paste valid SVG markup (must contain <svg>)');}
 </script>
+</body>
+</html>
