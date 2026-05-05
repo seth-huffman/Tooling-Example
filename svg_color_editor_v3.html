@@ -1,0 +1,418 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+#app { display: flex; flex-direction: column; min-height: 600px; position: relative; font-family: var(--font-mono); }
+#toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+#toolbar h1 { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); flex: 1; }
+.tbtn { font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-family: var(--font-mono); transition: all 0.1s; }
+.tbtn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+.tbtn:hover:not(.active) { background: var(--color-background-secondary); }
+#main { display: grid; grid-template-columns: 270px 1fr; flex: 1; }
+#sidebar { border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; overflow: hidden; }
+.panel-hdr { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-tertiary); padding: 9px 14px 7px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 6px; }
+#drop-zone { margin: 12px 14px 8px; border: 1.5px dashed var(--color-border-secondary); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+#drop-zone:hover, #drop-zone.drag-over { border-color: var(--color-text-secondary); background: var(--color-background-secondary); }
+#drop-zone p { font-size: 11px; color: var(--color-text-tertiary); line-height: 1.6; }
+#drop-zone .dicon { font-size: 20px; margin-bottom: 4px; display: block; }
+#file-input { display: none; }
+#paste-area { margin: 0 14px 8px; font-size: 10px; font-family: var(--font-mono); border: 0.5px solid var(--color-border-tertiary); border-radius: 6px; padding: 7px; color: var(--color-text-secondary); resize: none; background: var(--color-background-primary); height: 56px; width: calc(100% - 28px); }
+#paste-area:focus { outline: none; border-color: var(--color-border-secondary); }
+#load-btn { margin: 0 14px 10px; width: calc(100% - 28px); font-size: 11px; padding: 6px; cursor: pointer; font-family: var(--font-mono); border-radius: 6px; }
+#sidebar-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.stab { flex: 1; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; padding: 7px 0; text-align: center; cursor: pointer; color: var(--color-text-tertiary); border-bottom: 2px solid transparent; transition: all 0.1s; }
+.stab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); }
+.stab:hover:not(.active) { color: var(--color-text-secondary); }
+#tab-colors, #tab-themes { flex: 1; overflow-y: auto; }
+#tab-themes { padding: 10px 0; }
+.color-row { display: flex; align-items: center; gap: 8px; padding: 5px 14px; cursor: pointer; transition: background 0.1s; }
+.color-row:hover { background: var(--color-background-secondary); }
+.swatch { width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0; border: 0.5px solid var(--color-border-tertiary); }
+.color-hex { font-size: 11px; font-weight: 500; color: var(--color-text-primary); }
+.color-count { font-size: 10px; color: var(--color-text-tertiary); }
+.arrow-icon { font-size: 13px; flex-shrink: 0; }
+.mapped-sw { width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0; border: 0.5px solid var(--color-border-tertiary); }
+.theme-section { margin-bottom: 4px; }
+.theme-section-label { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-text-tertiary); padding: 6px 14px 4px; }
+.theme-card { margin: 4px 14px; border: 0.5px solid var(--color-border-tertiary); border-radius: 8px; cursor: pointer; padding: 9px 11px; transition: border-color 0.15s, background 0.15s; }
+.theme-card:hover { border-color: var(--color-border-secondary); background: var(--color-background-secondary); }
+.theme-card.applied { border-color: var(--color-text-primary); border-width: 1.5px; }
+.theme-name { font-size: 11px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 5px; }
+.theme-desc { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 7px; line-height: 1.4; }
+.theme-swatches { display: flex; gap: 4px; flex-wrap: wrap; }
+.theme-sw { width: 16px; height: 16px; border-radius: 3px; border: 0.5px solid var(--color-border-tertiary); flex-shrink: 0; }
+.apply-badge { float: right; font-size: 10px; padding: 2px 7px; border-radius: 3px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); margin-top: -2px; }
+.theme-card.applied .apply-badge { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+#preview-panel { display: flex; flex-direction: column; overflow: hidden; }
+#preview-hdr { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.preview-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); }
+#export-btn { margin-left: auto; font-size: 11px; padding: 4px 10px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
+#export-btn:disabled { opacity: 0.4; cursor: default; }
+#reset-btn { font-size: 11px; padding: 4px 10px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
+#previews { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+.preview-pane { display: flex; flex-direction: column; border-right: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+.preview-pane:last-child { border-right: none; }
+.pane-label { font-size: 10px; padding: 6px 10px; color: var(--color-text-tertiary); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.svg-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; min-height: 220px; }
+.svg-container svg { max-width: 100%; max-height: 220px; width: auto; height: auto; }
+#empty-msg { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: var(--color-text-tertiary); font-size: 12px; padding: 60px 0; }
+#color-modal { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); }
+#color-modal.open { display: flex; }
+.modal-box { background: var(--color-background-primary); border-radius: 10px; border: 0.5px solid var(--color-border-secondary); padding: 20px; min-width: 290px; }
+.modal-title { font-size: 12px; font-weight: 500; margin-bottom: 14px; color: var(--color-text-primary); }
+.mode-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); margin-bottom: 6px; }
+.mode-row { display: flex; align-items: center; gap: 8px; }
+.modal-sw { width: 26px; height: 26px; border-radius: 4px; border: 0.5px solid var(--color-border-tertiary); flex-shrink: 0; }
+.modal-color-input { width: 80px; font-size: 11px; font-family: var(--font-mono); padding: 4px 6px; border-radius: 4px; }
+.modal-color-native { width: 36px; height: 28px; padding: 2px; border-radius: 4px; cursor: pointer; border: 0.5px solid var(--color-border-tertiary); }
+.qsw { width: 20px; height: 20px; border-radius: 3px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); display: inline-block; transition: transform 0.1s; }
+.qsw:hover { transform: scale(1.25); }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+.modal-actions button { font-size: 11px; padding: 5px 12px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
+</style>
+
+<div id="app">
+  <div id="toolbar">
+    <h1>SVG Color Scheme Editor</h1>
+    <span style="font-size:10px;color:var(--color-text-tertiary);margin-right:2px;">preview bg:</span>
+    <button class="tbtn active" id="btn-auto" onclick="setBg('auto')">auto</button>
+    <button class="tbtn" id="btn-light" onclick="setBg('light')">light</button>
+    <button class="tbtn" id="btn-dark" onclick="setBg('dark')">dark</button>
+  </div>
+
+  <div id="main">
+    <div id="sidebar">
+      <div class="panel-hdr">Input SVG</div>
+      <div id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="dv(event,'add')" ondrop="onDrop(event)" ondragleave="dv(event,'rem')">
+        <span class="dicon">⬡</span>
+        <p>Drop SVG file here<br>or click to browse</p>
+      </div>
+      <input type="file" id="file-input" accept=".svg,image/svg+xml" onchange="onFileChange(event)">
+      <textarea id="paste-area" placeholder="...or paste SVG markup here"></textarea>
+      <button id="load-btn" onclick="loadFromPaste()">parse svg ↗</button>
+
+      <div id="sidebar-tabs">
+        <div class="stab active" id="stab-colors" onclick="switchTab('colors')">colors</div>
+        <div class="stab" id="stab-themes" onclick="switchTab('themes')">themes</div>
+      </div>
+
+      <div id="tab-colors">
+        <div id="color-list"><div style="padding:20px 14px;font-size:11px;color:var(--color-text-tertiary);text-align:center;">Load an SVG to see its colors</div></div>
+      </div>
+
+      <div id="tab-themes" style="display:none;"></div>
+    </div>
+
+    <div id="preview-panel">
+      <div id="preview-hdr">
+        <span class="preview-label">Original</span>
+        <span style="font-size:11px;color:var(--color-text-tertiary);margin:0 2px;">→</span>
+        <span class="preview-label">Remapped</span>
+        <button id="reset-btn" onclick="resetMap()" style="opacity:0.5;">reset</button>
+        <button id="export-btn" disabled onclick="exportSVG()">export svg ↓</button>
+      </div>
+      <div id="previews">
+        <div id="empty-msg"><span style="font-size:28px;">◈</span><span>Load an SVG to preview</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="color-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">Remap color</div>
+      <div id="modal-content"></div>
+      <div class="modal-actions">
+        <button onclick="closeModal()">cancel</button>
+        <button onclick="applyRemap()" style="background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary);">apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let originalSVG = '', colorMap = {}, detectedColors = [], currentEditColor = null, bgMode = 'auto', activeTheme = null, activeTab = 'colors';
+
+const THEMES = [
+  {
+    id:'dark-ui', label:'dark UI', group:'dark',
+    desc:'Deep charcoal bg, light text, muted borders. Classic app dark mode.',
+    palette:['#1a1a1a','#2c2c2c','#3a3a3a','#f0f0f0','#ffffff','#888888','#4a9eff','#ff6b6b'],
+    bg:'#1a1a1a'
+  },
+  {
+    id:'amoled', label:'amoled black', group:'dark',
+    desc:'Pure black bg, high contrast white, vivid accent.',
+    palette:['#000000','#111111','#1e1e1e','#ffffff','#eeeeee','#aaaaaa','#00e5ff','#ff4081'],
+    bg:'#000000'
+  },
+  {
+    id:'dark-warm', label:'dark warm', group:'dark',
+    desc:'Warm-tinted dark surface, amber and cream tones.',
+    palette:['#1c1814','#2a231c','#3b3028','#f5e6c8','#fffaf0','#a89070','#e8a44a','#c96a3a'],
+    bg:'#1c1814'
+  },
+  {
+    id:'light-clean', label:'light clean', group:'light',
+    desc:'White bg, dark grey text, subtle borders. Default light mode.',
+    palette:['#ffffff','#f5f5f5','#e8e8e8','#1a1a1a','#333333','#777777','#2563eb','#dc2626'],
+    bg:'#ffffff'
+  },
+  {
+    id:'light-warm', label:'light warm', group:'light',
+    desc:'Warm paper tones, ink text, terracotta accents.',
+    palette:['#faf6f1','#f0e8dc','#ddd0be','#2d1f0e','#4a3728','#8a7060','#c4611a','#5b8a3c'],
+    bg:'#faf6f1'
+  },
+  {
+    id:'light-cool', label:'light cool', group:'light',
+    desc:'Cool grey-blue bg, navy text, crisp accents.',
+    palette:['#f0f4f8','#dde6ef','#c2d4e4','#0f2a40','#1e4060','#5a7fa0','#1a6ecf','#d64d3b'],
+    bg:'#f0f4f8'
+  },
+  {
+    id:'solarized', label:'solarized', group:'themed',
+    desc:'Classic Solarized palette — warm base tones, muted accents.',
+    palette:['#002b36','#073642','#586e75','#839496','#eee8d5','#fdf6e3','#268bd2','#cb4b16','#859900','#d33682'],
+    bg:'#002b36'
+  },
+  {
+    id:'nord', label:'nord', group:'themed',
+    desc:'Arctic, blue-grey tones with cool accent colors.',
+    palette:['#2e3440','#3b4252','#434c5e','#4c566a','#d8dee9','#e5e9f0','#eceff4','#88c0d0','#81a1c1','#5e81ac','#bf616a','#a3be8c'],
+    bg:'#2e3440'
+  },
+  {
+    id:'dracula', label:'dracula', group:'themed',
+    desc:'Purple-tinted dark with vivid accent colors.',
+    palette:['#282a36','#44475a','#f8f8f2','#6272a4','#8be9fd','#50fa7b','#ffb86c','#ff79c6','#bd93f9','#ff5555'],
+    bg:'#282a36'
+  },
+  {
+    id:'pastel', label:'pastel', group:'themed',
+    desc:'Soft, desaturated pastels on a cream background.',
+    palette:['#fff9f0','#fce4ec','#f3e5f5','#e8eaf6','#e0f2f1','#fef9c3','#ffccbc','#b2dfdb','#c5cae9','#f8bbd0'],
+    bg:'#fff9f0'
+  },
+  {
+    id:'monochrome', label:'monochrome', group:'themed',
+    desc:'Pure greyscale — useful for print or icon testing.',
+    palette:['#000000','#1a1a1a','#333333','#555555','#777777','#999999','#bbbbbb','#dddddd','#f0f0f0','#ffffff'],
+    bg:'#f0f0f0'
+  },
+  {
+    id:'high-contrast', label:'high contrast', group:'themed',
+    desc:'Maximum contrast — accessibility-first palette.',
+    palette:['#000000','#ffffff','#ffff00','#00ffff','#ff00ff','#ff0000','#00ff00','#0000ff'],
+    bg:'#000000'
+  },
+];
+
+function hexFull(h) {
+  h = h.trim().toLowerCase();
+  if (h.length === 4) h = '#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  return h;
+}
+function normalizeColor(c) {
+  if (!c) return null;
+  c = c.trim().toLowerCase();
+  if (c==='none'||c==='transparent'||c==='inherit'||c==='currentcolor') return null;
+  if (/^#[0-9a-f]{3,6}$/.test(c)) return hexFull(c);
+  const rgb = c.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
+  if (rgb) return '#'+[rgb[1],rgb[2],rgb[3]].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+  const named={black:'#000000',white:'#ffffff',red:'#ff0000',blue:'#0000ff',green:'#008000',gray:'#808080',grey:'#808080',navy:'#000080',maroon:'#800000',purple:'#800080',orange:'#ffa500',yellow:'#ffff00',lime:'#00ff00',aqua:'#00ffff',teal:'#008080',silver:'#c0c0c0',fuchsia:'#ff00ff',olive:'#808000'};
+  return named[c]||null;
+}
+
+function extractColors(svgText) {
+  const counts={};
+  const bump=c=>{const n=normalizeColor(c);if(n)counts[n]=(counts[n]||0)+1;};
+  const doc=new DOMParser().parseFromString(svgText,'image/svg+xml');
+  const attrs=['fill','stroke','stop-color','color','flood-color','lighting-color'];
+  doc.querySelectorAll('*').forEach(el=>{
+    attrs.forEach(a=>bump(el.getAttribute(a)));
+    const st=el.getAttribute('style');
+    if(st)attrs.forEach(a=>{const m=st.match(new RegExp(a+'\\s*:\\s*([^;]+)','i'));if(m)bump(m[1]);});
+  });
+  [...svgText.matchAll(/#([0-9a-fA-F]{3,6})\b/g)].forEach(m=>bump('#'+m[1]));
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([color,count])=>({color,count}));
+}
+
+function applyColorMapToSVG(svgText, map) {
+  if (!Object.keys(map).length) return svgText;
+  const doc=new DOMParser().parseFromString(svgText,'image/svg+xml');
+  const attrs=['fill','stroke','stop-color','color','flood-color','lighting-color'];
+  doc.querySelectorAll('*').forEach(el=>{
+    attrs.forEach(a=>{const v=el.getAttribute(a);if(!v)return;const n=normalizeColor(v);if(n&&map[n])el.setAttribute(a,map[n]);});
+    const st=el.getAttribute('style');
+    if(st){let ns=st;attrs.forEach(a=>{ns=ns.replace(new RegExp('('+a+'\\s*:\\s*)([^;]+)','gi'),(_,prop,val)=>{const n=normalizeColor(val.trim());return prop+(n&&map[n]?map[n]:val);});});if(ns!==st)el.setAttribute('style',ns);}
+  });
+  doc.querySelectorAll('style').forEach(s=>{s.textContent=s.textContent.replace(/#([0-9a-fA-F]{3,6})\b/g,m=>{const n=normalizeColor(m);return(n&&map[n])?map[n]:m;});});
+  return new XMLSerializer().serializeToString(doc.documentElement);
+}
+
+function loadSVG(text) {
+  originalSVG=text; colorMap={}; activeTheme=null;
+  detectedColors=extractColors(text);
+  renderColorList(); renderThemes(); renderPreviews();
+  document.getElementById('export-btn').disabled=false;
+  const em=document.getElementById('empty-msg'); if(em) em.remove();
+}
+
+function renderColorList() {
+  const list=document.getElementById('color-list');
+  if (!detectedColors.length){list.innerHTML='<div style="padding:20px 14px;font-size:11px;color:var(--color-text-tertiary);text-align:center;">No colors found</div>';return;}
+  list.innerHTML=detectedColors.map(({color,count})=>{
+    const mapped=colorMap[color]||color, changed=colorMap[color]&&colorMap[color]!==color;
+    return `<div class="color-row" onclick="openModal('${color}')">
+      <div class="swatch" style="background:${color}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="color-hex">${color}</div>
+        <div class="color-count">${count} use${count!==1?'s':''}</div>
+      </div>
+      <span class="arrow-icon" style="color:${changed?'var(--color-text-primary)':'var(--color-border-secondary)'}">→</span>
+      <div class="mapped-sw" style="background:${mapped};${changed?'outline:1.5px solid var(--color-text-secondary);outline-offset:1px;':''}"></div>
+    </div>`;
+  }).join('');
+}
+
+function renderThemes() {
+  const panel=document.getElementById('tab-themes');
+  const groups=[
+    {key:'dark', label:'dark modes'},
+    {key:'light', label:'light modes'},
+    {key:'themed', label:'themed palettes'},
+  ];
+  panel.innerHTML=groups.map(g=>{
+    const themes=THEMES.filter(t=>t.group===g.key);
+    return `<div class="theme-section">
+      <div class="theme-section-label">${g.label}</div>
+      ${themes.map(t=>`
+        <div class="theme-card${activeTheme===t.id?' applied':''}" id="tc-${t.id}" onclick="applyTheme('${t.id}')">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div class="theme-name">${t.label}</div>
+            <div class="apply-badge">${activeTheme===t.id?'applied':'apply'}</div>
+          </div>
+          <div class="theme-desc">${t.desc}</div>
+          <div class="theme-swatches">${t.palette.map(c=>`<div class="theme-sw" style="background:${c}"></div>`).join('')}</div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function applyTheme(themeId) {
+  if (!originalSVG) { alert('Load an SVG first.'); return; }
+  const theme = THEMES.find(t=>t.id===themeId);
+  if (!theme) return;
+  activeTheme = themeId;
+
+  const detected = detectedColors.map(d=>d.color);
+  const palette = theme.palette;
+
+  const sorted = [...detected].sort((a,b)=>{
+    return luminance(b) - luminance(a);
+  });
+  const palSorted = [...palette].sort((a,b)=>luminance(b)-luminance(a));
+
+  colorMap = {};
+  sorted.forEach((src, i)=>{
+    const target = palSorted[Math.round(i*(palSorted.length-1)/(sorted.length||1))];
+    if (target) colorMap[src] = target;
+  });
+
+  renderColorList(); renderThemes(); renderPreviews();
+  switchTab('colors');
+}
+
+function luminance(hex) {
+  const c=normalizeColor(hex); if(!c) return 0;
+  const r=parseInt(c.slice(1,3),16)/255, g=parseInt(c.slice(3,5),16)/255, b=parseInt(c.slice(5,7),16)/255;
+  const lin=x=>x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);
+  return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b);
+}
+
+function resetMap() {
+  colorMap={}; activeTheme=null;
+  renderColorList(); renderThemes(); renderPreviews();
+}
+
+function bgStyle() {
+  if(bgMode==='light') return 'background:#ffffff';
+  if(bgMode==='dark') return 'background:#1c1c1c';
+  return 'background:var(--color-background-primary)';
+}
+
+function renderPreviews() {
+  if(!originalSVG) return;
+  const remapped=applyColorMapToSVG(originalSVG,colorMap);
+  const bg=bgStyle();
+  document.getElementById('previews').innerHTML=`
+    <div class="preview-pane" style="${bg}">
+      <div class="pane-label">original</div>
+      <div class="svg-container">${originalSVG}</div>
+    </div>
+    <div class="preview-pane" style="${bg}">
+      <div class="pane-label">remapped</div>
+      <div class="svg-container">${remapped}</div>
+    </div>`;
+}
+
+function setBg(mode) {
+  bgMode=mode; ['auto','light','dark'].forEach(m=>document.getElementById('btn-'+m).classList.toggle('active',m===mode));
+  renderPreviews();
+}
+
+function switchTab(tab) {
+  activeTab=tab;
+  ['colors','themes'].forEach(t=>{
+    document.getElementById('stab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('tab-'+t).style.display=t===tab?'':'none';
+  });
+}
+
+const quickColors=['#000000','#1c1c1c','#333333','#555555','#888888','#bbbbbb','#dddddd','#ffffff','#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#c0392b','#d35400','#f39c12','#27ae60','#16a085','#2980b9','#8e44ad','#c2185b','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FFB347','#98D8C8'];
+
+function openModal(color) {
+  currentEditColor=color;
+  const cur=colorMap[color]||color;
+  document.getElementById('modal-title').textContent='Remap  '+color;
+  document.getElementById('modal-content').innerHTML=`
+    <div style="margin-bottom:12px;">
+      <div class="mode-label">source</div>
+      <div class="mode-row"><div class="modal-sw" style="background:${color}"></div><span style="font-size:11px;color:var(--color-text-secondary);margin-left:4px;">${color}</span></div>
+    </div>
+    <div>
+      <div class="mode-label">replace with</div>
+      <div class="mode-row">
+        <div class="modal-sw" id="prev-sw" style="background:${cur}"></div>
+        <input class="modal-color-input" type="text" id="remap-hex" value="${cur}" oninput="onHex(this.value)">
+        <input class="modal-color-native" type="color" id="remap-nat" value="${cur.length===7?cur:'#000000'}" oninput="onNat(this.value)">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;">${quickColors.map(c=>`<div class="qsw" style="background:${c}" onclick="pickQ('${c}')"></div>`).join('')}</div>
+    </div>`;
+  document.getElementById('color-modal').classList.add('open');
+}
+
+function onHex(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){document.getElementById('remap-nat').value=v;document.getElementById('prev-sw').style.background=v;}}
+function onNat(v){document.getElementById('remap-hex').value=v;document.getElementById('prev-sw').style.background=v;}
+function pickQ(c){document.getElementById('remap-hex').value=c;document.getElementById('remap-nat').value=c;document.getElementById('prev-sw').style.background=c;}
+
+function applyRemap(){
+  const hex=document.getElementById('remap-hex').value.trim();
+  if(/^#[0-9a-fA-F]{3,6}$/.test(hex)){colorMap[currentEditColor]=hexFull(hex);activeTheme=null;renderColorList();renderThemes();renderPreviews();}
+  closeModal();
+}
+function closeModal(){document.getElementById('color-modal').classList.remove('open');}
+
+function exportSVG(){
+  const out=applyColorMapToSVG(originalSVG,colorMap);
+  const blob=new Blob([out],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='remapped.svg';a.click();
+  URL.revokeObjectURL(url);
+}
+
+function dv(e,op){e.preventDefault();document.getElementById('drop-zone').classList[op==='add'?'add':'remove']('drag-over');}
+function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)readFile(f);}
+function onFileChange(e){const f=e.target.files[0];if(f)readFile(f);}
+function readFile(f){const r=new FileReader();r.onload=ev=>loadSVG(ev.target.result);r.readAsText(f);}
+function loadFromPaste(){const v=document.getElementById('paste-area').value.trim();if(v.includes('<svg'))loadSVG(v);else alert('Paste valid SVG markup (must contain <svg>)');}
+</script>
