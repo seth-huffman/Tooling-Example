@@ -86,6 +86,27 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 .qsw:hover { transform: scale(1.25); }
 .modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 .modal-actions button { font-size: 11px; padding: 5px 12px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
+#tab-github { padding: 12px 14px; display: none; flex-direction: column; gap: 10px; overflow-y: auto; }
+#ct-form { margin: 2px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+#ct-palette-row { display: flex; flex-wrap: wrap; gap: 5px; min-height: 22px; }
+.ct-swatch { width: 22px; height: 22px; border-radius: 3px; border: 0.5px solid var(--color-border-secondary); cursor: pointer; position: relative; flex-shrink: 0; transition: transform 0.1s; }
+.ct-swatch:hover { transform: scale(1.2); }
+.ct-swatch:hover::after { content: '×'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; background: rgba(0,0,0,0.5); border-radius: 3px; }
+.ct-color-row { display: flex; gap: 5px; align-items: center; }
+#ct-save-btn { font-size: 11px; padding: 6px; cursor: pointer; font-family: var(--font-mono); border-radius: 6px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; width: 100%; }
+.ct-del-btn { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 14px; padding: 0 3px; line-height: 1; }
+.ct-del-btn:hover { color: #f85149; }
+.gh-field { display: flex; flex-direction: column; gap: 3px; }
+.gh-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); }
+.gh-input { font-size: 11px; font-family: var(--font-mono); padding: 5px 7px; border-radius: 5px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-primary); width: 100%; }
+.gh-input:focus { outline: none; border-color: var(--color-text-secondary); }
+.gh-hint { font-size: 10px; color: var(--color-text-tertiary); line-height: 1.4; }
+#gh-push-btn { font-size: 11px; padding: 6px; cursor: pointer; font-family: var(--font-mono); border-radius: 6px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; width: 100%; }
+#gh-push-btn:disabled { opacity: 0.4; cursor: default; }
+#gh-status { font-size: 11px; min-height: 16px; line-height: 1.4; }
+.gh-success { color: #4caf50; }
+.gh-error { color: #f85149; }
+.gh-info { color: var(--color-text-secondary); }
 </style>
 
 <div id="app">
@@ -111,13 +132,78 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
       <div id="sidebar-tabs">
         <div class="stab active" id="stab-colors" onclick="switchTab('colors')">colors</div>
         <div class="stab" id="stab-themes" onclick="switchTab('themes')">themes</div>
+        <div class="stab" id="stab-github" onclick="switchTab('github')">github</div>
       </div>
 
       <div id="tab-colors">
         <div id="color-list"><div style="padding:20px 14px;font-size:11px;color:var(--color-text-tertiary);text-align:center;">Load an SVG to see its colors</div></div>
       </div>
 
-      <div id="tab-themes" style="display:none;"></div>
+      <div id="tab-themes" style="display:none; overflow-y:auto;">
+        <div id="theme-list"></div>
+        <div class="theme-section">
+          <div class="theme-section-label">custom themes</div>
+          <div id="custom-theme-list"></div>
+          <div id="ct-form">
+            <div class="gh-field">
+              <label class="gh-label">Theme name</label>
+              <input type="text" id="ct-name" class="gh-input" placeholder="My Theme">
+            </div>
+            <div class="gh-field">
+              <label class="gh-label">Description (optional)</label>
+              <input type="text" id="ct-desc" class="gh-input" placeholder="Brief description">
+            </div>
+            <div class="gh-field">
+              <label class="gh-label">Background color</label>
+              <div class="ct-color-row">
+                <input type="text" id="ct-bg-hex" class="gh-input" placeholder="#1a1a1a" value="#1a1a1a" style="width:90px;" oninput="ctBgHex(this.value)">
+                <input type="color" id="ct-bg-nat" value="#1a1a1a" class="modal-color-native" oninput="ctBgNat(this.value)">
+              </div>
+            </div>
+            <div class="gh-field">
+              <label class="gh-label">Palette colors</label>
+              <div id="ct-palette-row"></div>
+              <div class="ct-color-row" style="margin-top:5px;">
+                <input type="text" id="ct-col-hex" class="gh-input" placeholder="#ffffff" style="width:80px;" oninput="ctColHex(this.value)">
+                <input type="color" id="ct-col-nat" value="#ffffff" class="modal-color-native" oninput="ctColNat(this.value)">
+                <button class="tbtn" onclick="ctAddColor()" style="padding:3px 8px;">+ add</button>
+              </div>
+            </div>
+            <button id="ct-save-btn" onclick="saveCustomTheme()">save theme ✓</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-github">
+        <div class="gh-field">
+          <label class="gh-label">Personal Access Token</label>
+          <input type="password" id="gh-token" class="gh-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <span class="gh-hint">Needs <code>repo</code> scope. Never sent anywhere except GitHub.</span>
+        </div>
+        <div class="gh-field">
+          <label class="gh-label">Repository (owner/repo)</label>
+          <input type="text" id="gh-repo" class="gh-input" placeholder="octocat/my-repo">
+        </div>
+        <div class="gh-field">
+          <label class="gh-label">Branch</label>
+          <input type="text" id="gh-branch" class="gh-input" value="main" placeholder="main">
+        </div>
+        <div class="gh-field">
+          <label class="gh-label">File path in repo</label>
+          <input type="text" id="gh-path" class="gh-input" placeholder="icons/remapped.svg">
+          <span class="gh-hint">Leave blank to use "remapped.svg"</span>
+        </div>
+        <div class="gh-field">
+          <label class="gh-label">Commit message</label>
+          <input type="text" id="gh-msg" class="gh-input" placeholder="Add remapped SVG">
+        </div>
+        <div class="gh-field">
+          <label class="gh-label">Your name (committer)</label>
+          <input type="text" id="gh-name" class="gh-input" placeholder="Jane Doe">
+        </div>
+        <button id="gh-push-btn" onclick="pushToGitHub()" disabled>push to github ↑</button>
+        <div id="gh-status"></div>
+      </div>
     </div>
 
     <div id="preview-panel">
@@ -148,6 +234,8 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 
 <script>
 let originalSVG = '', colorMap = {}, detectedColors = [], currentEditColor = null, bgMode = 'auto', activeTheme = null, activeTab = 'colors';
+let customThemes = JSON.parse(localStorage.getItem('svgEditorCustomThemes') || '[]');
+let ctPalette = [];
 
 const THEMES = [
   {
@@ -272,6 +360,7 @@ function loadSVG(text) {
   detectedColors=extractColors(text);
   renderColorList(); renderThemes(); renderPreviews();
   document.getElementById('export-btn').disabled=false;
+  document.getElementById('gh-push-btn').disabled=false;
   const em=document.getElementById('empty-msg'); if(em) em.remove();
 }
 
@@ -293,13 +382,13 @@ function renderColorList() {
 }
 
 function renderThemes() {
-  const panel=document.getElementById('tab-themes');
+  const list=document.getElementById('theme-list');
   const groups=[
     {key:'dark', label:'dark modes'},
     {key:'light', label:'light modes'},
     {key:'themed', label:'themed palettes'},
   ];
-  panel.innerHTML=groups.map(g=>{
+  list.innerHTML=groups.map(g=>{
     const themes=THEMES.filter(t=>t.group===g.key);
     return `<div class="theme-section">
       <div class="theme-section-label">${g.label}</div>
@@ -314,11 +403,12 @@ function renderThemes() {
         </div>`).join('')}
     </div>`;
   }).join('');
+  renderCustomThemes();
 }
 
 function applyTheme(themeId) {
   if (!originalSVG) { alert('Load an SVG first.'); return; }
-  const theme = THEMES.find(t=>t.id===themeId);
+  const theme = THEMES.find(t=>t.id===themeId) || customThemes.find(t=>t.id===themeId);
   if (!theme) return;
   activeTheme = themeId;
 
@@ -380,9 +470,10 @@ function setBg(mode) {
 
 function switchTab(tab) {
   activeTab=tab;
-  ['colors','themes'].forEach(t=>{
+  ['colors','themes','github'].forEach(t=>{
     document.getElementById('stab-'+t).classList.toggle('active',t===tab);
-    document.getElementById('tab-'+t).style.display=t===tab?'':'none';
+    const panel=document.getElementById('tab-'+t);
+    panel.style.display=t===tab?(t==='github'?'flex':''):'none';
   });
 }
 
@@ -428,11 +519,141 @@ function exportSVG(){
   URL.revokeObjectURL(url);
 }
 
+// --- Custom Themes ---
+function renderCustomThemes() {
+  const list = document.getElementById('custom-theme-list');
+  if (!customThemes.length) {
+    list.innerHTML = '<div style="padding:2px 0 8px;font-size:10px;color:var(--color-text-tertiary);">No custom themes yet — create one below.</div>';
+    return;
+  }
+  list.innerHTML = customThemes.map(t => `
+    <div class="theme-card${activeTheme===t.id?' applied':''}" id="tc-${t.id}" onclick="applyTheme('${t.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="theme-name">${t.label}</div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div class="apply-badge">${activeTheme===t.id?'applied':'apply'}</div>
+          <button class="ct-del-btn" onclick="event.stopPropagation();deleteCustomTheme('${t.id}')" title="Delete">×</button>
+        </div>
+      </div>
+      ${t.desc?`<div class="theme-desc">${t.desc}</div>`:''}
+      <div class="theme-swatches">${t.palette.map(c=>`<div class="theme-sw" style="background:${c}"></div>`).join('')}</div>
+    </div>`).join('');
+}
+
+function saveCustomTheme() {
+  const name = document.getElementById('ct-name').value.trim();
+  if (!name) { alert('Theme name is required.'); return; }
+  if (ctPalette.length < 2) { alert('Add at least 2 palette colors.'); return; }
+  const bg = document.getElementById('ct-bg-hex').value.trim() || '#1a1a1a';
+  const desc = document.getElementById('ct-desc').value.trim();
+  customThemes.push({ id: 'ct-' + Date.now(), label: name, desc, palette: [...ctPalette], bg, group: 'custom' });
+  localStorage.setItem('svgEditorCustomThemes', JSON.stringify(customThemes));
+  ctPalette = [];
+  document.getElementById('ct-name').value = '';
+  document.getElementById('ct-desc').value = '';
+  renderCtPalette();
+  renderCustomThemes();
+}
+
+function deleteCustomTheme(id) {
+  customThemes = customThemes.filter(t => t.id !== id);
+  localStorage.setItem('svgEditorCustomThemes', JSON.stringify(customThemes));
+  if (activeTheme === id) { activeTheme = null; colorMap = {}; renderColorList(); renderPreviews(); }
+  renderCustomThemes();
+}
+
+function ctAddColor() {
+  const hex = document.getElementById('ct-col-hex').value.trim();
+  if (!/^#[0-9a-fA-F]{3,6}$/.test(hex)) { alert('Enter a valid hex color.'); return; }
+  ctPalette.push(hexFull(hex));
+  renderCtPalette();
+}
+
+function ctRemoveColor(i) {
+  ctPalette.splice(i, 1);
+  renderCtPalette();
+}
+
+function renderCtPalette() {
+  document.getElementById('ct-palette-row').innerHTML = ctPalette.map((c, i) =>
+    `<div class="ct-swatch" style="background:${c}" onclick="ctRemoveColor(${i})" title="${c} — click to remove"></div>`
+  ).join('');
+}
+
+function ctBgHex(v) { if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById('ct-bg-nat').value = v; }
+function ctBgNat(v) { document.getElementById('ct-bg-hex').value = v; }
+function ctColHex(v) { if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById('ct-col-nat').value = v; }
+function ctColNat(v) { document.getElementById('ct-col-hex').value = v; }
+
 function dv(e,op){e.preventDefault();document.getElementById('drop-zone').classList[op==='add'?'add':'remove']('drag-over');}
 function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)readFile(f);}
 function onFileChange(e){const f=e.target.files[0];if(f)readFile(f);}
 function readFile(f){const r=new FileReader();r.onload=ev=>loadSVG(ev.target.result);r.readAsText(f);}
 function loadFromPaste(){const v=document.getElementById('paste-area').value.trim();if(v.includes('<svg'))loadSVG(v);else alert('Paste valid SVG markup (must contain <svg>)');}
+
+async function pushToGitHub() {
+  const token = document.getElementById('gh-token').value.trim();
+  const repoFull = document.getElementById('gh-repo').value.trim();
+  const branch = document.getElementById('gh-branch').value.trim() || 'main';
+  const rawPath = document.getElementById('gh-path').value.trim() || 'remapped.svg';
+  const commitMsg = document.getElementById('gh-msg').value.trim();
+  const committerName = document.getElementById('gh-name').value.trim();
+
+  if (!token || !repoFull) { ghStatus('Token and repository are required.', 'error'); return; }
+  const [owner, repo] = repoFull.split('/');
+  if (!owner || !repo) { ghStatus('Repository must be in owner/repo format.', 'error'); return; }
+
+  const lastSlash = rawPath.lastIndexOf('/');
+  const folder = lastSlash >= 0 ? rawPath.slice(0, lastSlash + 1) : '';
+  const filename = lastSlash >= 0 ? rawPath.slice(lastSlash + 1) : rawPath;
+  const content = applyColorMapToSVG(originalSVG, colorMap);
+
+  const btn = document.getElementById('gh-push-btn');
+  btn.disabled = true;
+  ghStatus('Uploading…', 'info');
+  try {
+    await uploadToGitHub(token, owner, repo, branch, folder, filename, content, commitMsg, committerName);
+    ghStatus('Uploaded successfully → ' + rawPath, 'success');
+  } catch(err) {
+    ghStatus('Error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function ghStatus(msg, type) {
+  document.getElementById('gh-status').innerHTML = `<span class="gh-${type}">${msg}</span>`;
+}
+
+async function uploadToGitHub(token, owner, repo, branch, folder, filename, content, commitMsg, committerName) {
+  const path = `${folder}${filename}`;
+  const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
+  const headers = { Authorization: `Bearer ${token}` };
+
+  let sha;
+  try {
+    const res = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
+    if (res.ok) sha = (await res.json()).sha;
+  } catch {}
+
+  const body = {
+    message: commitMsg || (sha ? `Update ${filename}` : `Add ${filename}`),
+    content: btoa(unescape(encodeURIComponent(content))),
+    branch,
+  };
+  if (committerName) body.committer = { name: committerName, email: `${committerName.replace(/\s+/g,'.').toLowerCase()}@users.noreply.github.com` };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+}
 </script>
 </body>
 </html>
