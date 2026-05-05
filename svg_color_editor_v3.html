@@ -25,7 +25,7 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 .tbtn { font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-family: var(--font-mono); transition: all 0.1s; }
 .tbtn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
 .tbtn:hover:not(.active) { background: var(--color-background-secondary); }
-#main { display: grid; grid-template-columns: 270px 1fr; flex: 1; }
+#main { display: grid; grid-template-columns: 270px 1fr; flex: 1; overflow: hidden; }
 #sidebar { border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; overflow: hidden; }
 .panel-hdr { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-tertiary); padding: 9px 14px 7px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 6px; }
 #drop-zone { margin: 12px 14px 8px; border: 1.5px dashed var(--color-border-secondary); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
@@ -33,6 +33,14 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 #drop-zone p { font-size: 11px; color: var(--color-text-tertiary); line-height: 1.6; }
 #drop-zone .dicon { font-size: 20px; margin-bottom: 4px; display: block; }
 #file-input { display: none; }
+#asset-list { border-bottom: 0.5px solid var(--color-border-tertiary); display: none; }
+#asset-items { list-style: none; max-height: 110px; overflow-y: auto; }
+#asset-items li { display: flex; align-items: center; justify-content: space-between; padding: 4px 14px; font-size: 11px; color: var(--color-text-secondary); }
+#asset-items li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+#asset-items li button { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; flex-shrink: 0; }
+#asset-items li button:hover { color: #f85149; }
+.clear-btn { margin-left: auto; background: none; border: none; font-size: 10px; color: var(--color-text-tertiary); cursor: pointer; font-family: var(--font-mono); padding: 0; letter-spacing: 0.05em; }
+.clear-btn:hover { color: var(--color-text-secondary); }
 #paste-area { margin: 0 14px 8px; font-size: 10px; font-family: var(--font-mono); border: 0.5px solid var(--color-border-tertiary); border-radius: 6px; padding: 7px; color: var(--color-text-secondary); resize: none; background: var(--color-background-primary); height: 56px; width: calc(100% - 28px); }
 #paste-area:focus { outline: none; border-color: var(--color-border-secondary); }
 #load-btn { margin: 0 14px 10px; width: calc(100% - 28px); font-size: 11px; padding: 6px; cursor: pointer; font-family: var(--font-mono); border-radius: 6px; }
@@ -61,19 +69,22 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 .apply-badge { float: right; font-size: 10px; padding: 2px 7px; border-radius: 3px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); margin-top: -2px; }
 .theme-card.applied .apply-badge { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
 #preview-panel { display: flex; flex-direction: column; overflow: hidden; }
-#preview-hdr { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+#preview-hdr { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); flex-shrink: 0; }
 .preview-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); }
 #export-btn { margin-left: auto; font-size: 11px; padding: 4px 10px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
 #export-btn:disabled { opacity: 0.4; cursor: default; }
 #reset-btn { font-size: 11px; padding: 4px 10px; cursor: pointer; font-family: var(--font-mono); border-radius: 4px; }
-#previews { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
-.preview-pane { display: flex; flex-direction: column; border-right: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+#previews { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+.asset-preview-group { border-bottom: 0.5px solid var(--color-border-tertiary); }
+.asset-preview-group-label { font-size: 10px; padding: 5px 10px; color: var(--color-text-tertiary); letter-spacing: 0.07em; text-transform: uppercase; background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preview-pair { display: flex; }
+.preview-pane { display: flex; flex-direction: column; flex: 1; border-right: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
 .preview-pane:last-child { border-right: none; }
 .pane-label { font-size: 10px; padding: 6px 10px; color: var(--color-text-tertiary); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.svg-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; min-height: 220px; }
-.svg-container svg { max-width: 100%; max-height: 220px; width: auto; height: auto; }
+.svg-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; min-height: 160px; }
+.svg-container svg { max-width: 100%; max-height: 160px; width: auto; height: auto; }
 #empty-msg { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: var(--color-text-tertiary); font-size: 12px; padding: 60px 0; }
-#color-modal { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); }
+#color-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); }
 #color-modal.open { display: flex; }
 .modal-box { background: var(--color-background-primary); border-radius: 10px; border: 0.5px solid var(--color-border-secondary); padding: 20px; min-width: 290px; }
 .modal-title { font-size: 12px; font-weight: 500; margin-bottom: 14px; color: var(--color-text-primary); }
@@ -120,12 +131,21 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 
   <div id="main">
     <div id="sidebar">
-      <div class="panel-hdr">Input SVG</div>
+      <div class="panel-hdr">Input SVG <button id="clear-files-btn" class="clear-btn" onclick="clearAllAssets()" disabled>clear files</button></div>
       <div id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="dv(event,'add')" ondrop="onDrop(event)" ondragleave="dv(event,'rem')">
         <span class="dicon">⬡</span>
-        <p>Drop SVG file here<br>or click to browse</p>
+        <p>Drop SVG files here<br>or click to browse (hold ⌘/Ctrl for multiple)</p>
       </div>
-      <input type="file" id="file-input" accept=".svg,image/svg+xml" onchange="onFileChange(event)">
+      <input type="file" id="file-input" accept=".svg,image/svg+xml" multiple onchange="onFileChange(event)">
+
+      <div id="asset-list">
+        <div class="panel-hdr">
+          Files <span id="asset-count" style="color:var(--color-text-tertiary);font-weight:normal;"></span>
+          <button class="clear-btn" onclick="clearAllAssets()">clear all</button>
+        </div>
+        <ul id="asset-items"></ul>
+      </div>
+
       <textarea id="paste-area" placeholder="...or paste SVG markup here"></textarea>
       <button id="load-btn" onclick="loadFromPaste()">parse svg ↗</button>
 
@@ -189,13 +209,13 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
           <input type="text" id="gh-branch" class="gh-input" value="main" placeholder="main">
         </div>
         <div class="gh-field">
-          <label class="gh-label">File path in repo</label>
-          <input type="text" id="gh-path" class="gh-input" placeholder="icons/remapped.svg">
-          <span class="gh-hint">Leave blank to use "remapped.svg"</span>
+          <label class="gh-label">Folder path in repo</label>
+          <input type="text" id="gh-path" class="gh-input" placeholder="icons/">
+          <span class="gh-hint">Folder to upload into. Files keep their original names.</span>
         </div>
         <div class="gh-field">
           <label class="gh-label">Commit message</label>
-          <input type="text" id="gh-msg" class="gh-input" placeholder="Add remapped SVG">
+          <input type="text" id="gh-msg" class="gh-input" placeholder="Add remapped SVGs">
         </div>
         <div class="gh-field">
           <label class="gh-label">Your name (committer)</label>
@@ -208,11 +228,9 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 
     <div id="preview-panel">
       <div id="preview-hdr">
-        <span class="preview-label">Original</span>
-        <span style="font-size:11px;color:var(--color-text-tertiary);margin:0 2px;">→</span>
-        <span class="preview-label">Remapped</span>
+        <span class="preview-label">Preview</span>
         <button id="reset-btn" onclick="resetMap()" style="opacity:0.5;">reset</button>
-        <button id="export-btn" disabled onclick="exportSVG()">export svg ↓</button>
+        <button id="export-btn" disabled onclick="exportSVG()">export all ↓</button>
       </div>
       <div id="previews">
         <div id="empty-msg"><span style="font-size:28px;">◈</span><span>Load an SVG to preview</span></div>
@@ -233,7 +251,8 @@ html, body { height: 100%; background: var(--color-background-primary); color: v
 </div>
 
 <script>
-let originalSVG = '', colorMap = {}, detectedColors = [], currentEditColor = null, bgMode = 'auto', activeTheme = null, activeTab = 'colors';
+let assets = []; // [{name, baseName, svgText}]
+let colorMap = {}, detectedColors = [], currentEditColor = null, bgMode = 'auto', activeTheme = null, activeTab = 'colors';
 let customThemes = JSON.parse(localStorage.getItem('svgEditorCustomThemes') || '[]');
 let ctPalette = [];
 
@@ -355,13 +374,79 @@ function applyColorMapToSVG(svgText, map) {
   return new XMLSerializer().serializeToString(doc.documentElement);
 }
 
-function loadSVG(text) {
-  originalSVG=text; colorMap={}; activeTheme=null;
-  detectedColors=extractColors(text);
-  renderColorList(); renderThemes(); renderPreviews();
-  document.getElementById('export-btn').disabled=false;
-  document.getElementById('gh-push-btn').disabled=false;
-  const em=document.getElementById('empty-msg'); if(em) em.remove();
+// --- Multi-file asset management ---
+function handleFiles(fileList) {
+  const svgFiles = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.svg'));
+  if (!svgFiles.length) return;
+  let loaded = 0;
+  svgFiles.forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const baseName = f.name.replace(/\.svg$/i, '');
+      if (!assets.find(a => a.baseName === baseName)) {
+        assets.push({ name: f.name, baseName, svgText: ev.target.result });
+      }
+      loaded++;
+      if (loaded === svgFiles.length) refreshFromAssets();
+    };
+    r.readAsText(f);
+  });
+}
+
+function removeAsset(baseName) {
+  assets = assets.filter(a => a.baseName !== baseName);
+  refreshFromAssets();
+}
+
+function clearAllAssets() {
+  assets = [];
+  colorMap = {};
+  detectedColors = [];
+  activeTheme = null;
+  refreshFromAssets();
+}
+
+function refreshFromAssets() {
+  const allText = assets.map(a => a.svgText).join('\n');
+  detectedColors = assets.length ? extractColors(allText) : [];
+
+  const assetListEl = document.getElementById('asset-list');
+  assetListEl.style.display = assets.length ? '' : 'none';
+  document.getElementById('clear-files-btn').disabled = !assets.length;
+
+  renderAssetList();
+  renderColorList();
+  renderThemes();
+  renderPreviews();
+
+  const hasAssets = assets.length > 0;
+  document.getElementById('export-btn').disabled = !hasAssets;
+  document.getElementById('gh-push-btn').disabled = !hasAssets;
+
+  if (!hasAssets) {
+    document.getElementById('previews').innerHTML = '<div id="empty-msg"><span style="font-size:28px;">◈</span><span>Load an SVG to preview</span></div>';
+  }
+}
+
+function renderAssetList() {
+  document.getElementById('asset-count').textContent = `(${assets.length})`;
+  document.getElementById('asset-items').innerHTML = assets.map(a =>
+    `<li>
+      <span title="${a.name}">${a.name}</span>
+      <button onclick="removeAsset('${a.baseName.replace(/'/g,"\\'")}')">×</button>
+    </li>`
+  ).join('');
+}
+
+function loadFromPaste() {
+  const v = document.getElementById('paste-area').value.trim();
+  if (!v.includes('<svg')) { alert('Paste valid SVG markup (must contain <svg>)'); return; }
+  if (!assets.find(a => a.baseName === 'pasted')) {
+    assets.push({ name: 'pasted.svg', baseName: 'pasted', svgText: v });
+  } else {
+    assets.find(a => a.baseName === 'pasted').svgText = v;
+  }
+  refreshFromAssets();
 }
 
 function renderColorList() {
@@ -407,7 +492,7 @@ function renderThemes() {
 }
 
 function applyTheme(themeId) {
-  if (!originalSVG) { alert('Load an SVG first.'); return; }
+  if (!assets.length) { alert('Load an SVG first.'); return; }
   const theme = THEMES.find(t=>t.id===themeId) || customThemes.find(t=>t.id===themeId);
   if (!theme) return;
   activeTheme = themeId;
@@ -415,9 +500,7 @@ function applyTheme(themeId) {
   const detected = detectedColors.map(d=>d.color);
   const palette = theme.palette;
 
-  const sorted = [...detected].sort((a,b)=>{
-    return luminance(b) - luminance(a);
-  });
+  const sorted = [...detected].sort((a,b) => luminance(b) - luminance(a));
   const palSorted = [...palette].sort((a,b)=>luminance(b)-luminance(a));
 
   colorMap = {};
@@ -449,18 +532,25 @@ function bgStyle() {
 }
 
 function renderPreviews() {
-  if(!originalSVG) return;
-  const remapped=applyColorMapToSVG(originalSVG,colorMap);
-  const bg=bgStyle();
-  document.getElementById('previews').innerHTML=`
-    <div class="preview-pane" style="${bg}">
-      <div class="pane-label">original</div>
-      <div class="svg-container">${originalSVG}</div>
-    </div>
-    <div class="preview-pane" style="${bg}">
-      <div class="pane-label">remapped</div>
-      <div class="svg-container">${remapped}</div>
-    </div>`;
+  if (!assets.length) return;
+  const bg = bgStyle();
+  document.getElementById('previews').innerHTML = assets.map(asset => {
+    const remapped = applyColorMapToSVG(asset.svgText, colorMap);
+    return `
+      <div class="asset-preview-group">
+        <div class="asset-preview-group-label">${asset.name}</div>
+        <div class="preview-pair">
+          <div class="preview-pane" style="${bg}">
+            <div class="pane-label">original</div>
+            <div class="svg-container">${asset.svgText}</div>
+          </div>
+          <div class="preview-pane" style="${bg}">
+            <div class="pane-label">remapped</div>
+            <div class="svg-container">${remapped}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function setBg(mode) {
@@ -511,12 +601,17 @@ function applyRemap(){
 }
 function closeModal(){document.getElementById('color-modal').classList.remove('open');}
 
-function exportSVG(){
-  const out=applyColorMapToSVG(originalSVG,colorMap);
-  const blob=new Blob([out],{type:'image/svg+xml'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='remapped.svg';a.click();
-  URL.revokeObjectURL(url);
+function exportSVG() {
+  assets.forEach(asset => {
+    const out = applyColorMapToSVG(asset.svgText, colorMap);
+    const blob = new Blob([out], {type: 'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = asset.baseName + '-remapped.svg';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 }
 
 // --- Custom Themes ---
@@ -586,16 +681,14 @@ function ctColHex(v) { if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(
 function ctColNat(v) { document.getElementById('ct-col-hex').value = v; }
 
 function dv(e,op){e.preventDefault();document.getElementById('drop-zone').classList[op==='add'?'add':'remove']('drag-over');}
-function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)readFile(f);}
-function onFileChange(e){const f=e.target.files[0];if(f)readFile(f);}
-function readFile(f){const r=new FileReader();r.onload=ev=>loadSVG(ev.target.result);r.readAsText(f);}
-function loadFromPaste(){const v=document.getElementById('paste-area').value.trim();if(v.includes('<svg'))loadSVG(v);else alert('Paste valid SVG markup (must contain <svg>)');}
+function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');handleFiles(e.dataTransfer.files);}
+function onFileChange(e){handleFiles(e.target.files);e.target.value='';}
 
 async function pushToGitHub() {
   const token = document.getElementById('gh-token').value.trim();
   const repoFull = document.getElementById('gh-repo').value.trim();
   const branch = document.getElementById('gh-branch').value.trim() || 'main';
-  const rawPath = document.getElementById('gh-path').value.trim() || 'remapped.svg';
+  const rawFolder = document.getElementById('gh-path').value.trim();
   const commitMsg = document.getElementById('gh-msg').value.trim();
   const committerName = document.getElementById('gh-name').value.trim();
 
@@ -603,19 +696,23 @@ async function pushToGitHub() {
   const [owner, repo] = repoFull.split('/');
   if (!owner || !repo) { ghStatus('Repository must be in owner/repo format.', 'error'); return; }
 
-  const lastSlash = rawPath.lastIndexOf('/');
-  const folder = lastSlash >= 0 ? rawPath.slice(0, lastSlash + 1) : '';
-  const filename = lastSlash >= 0 ? rawPath.slice(lastSlash + 1) : rawPath;
-  const content = applyColorMapToSVG(originalSVG, colorMap);
+  const folder = rawFolder && !rawFolder.endsWith('/') ? rawFolder + '/' : rawFolder;
 
   const btn = document.getElementById('gh-push-btn');
   btn.disabled = true;
-  ghStatus('Uploading…', 'info');
+  let uploaded = 0;
+  const total = assets.length;
+
   try {
-    await uploadToGitHub(token, owner, repo, branch, folder, filename, content, commitMsg, committerName);
-    ghStatus('Uploaded successfully → ' + rawPath, 'success');
+    for (const asset of assets) {
+      const content = applyColorMapToSVG(asset.svgText, colorMap);
+      ghStatus(`Uploading ${uploaded + 1}/${total}: ${asset.name}`, 'info');
+      await uploadToGitHub(token, owner, repo, branch, folder, asset.name, content, commitMsg, committerName);
+      uploaded++;
+    }
+    ghStatus(`Uploaded ${total} file${total !== 1 ? 's' : ''} successfully`, 'success');
   } catch(err) {
-    ghStatus('Error: ' + err.message, 'error');
+    ghStatus(`Error (${uploaded}/${total}): ` + err.message, 'error');
   } finally {
     btn.disabled = false;
   }
