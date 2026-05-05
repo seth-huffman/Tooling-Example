@@ -358,13 +358,12 @@
         const total = filesToUpload.length;
 
         try {
-            const filesToUpload = ['day', 'pink', 'night'];
             for (const file of filesToUpload) {
                 setStatus(`Uploading… ${uploaded + 1}/${total}: ${file.filename}`, 'info');
                 await uploadToGitHub(token, owner, repo, branch, folder, file.filename, file.content, commitMessage, committerName);
                 uploaded++;
             }
-            setStatus(`Successfully uploaded ${total} SVG${total !== 1 ? 's' : ''} to ${owner}/${repo}/${folder || ''}`, 'success');
+            setStatus(`Successfully uploaded ${total} file${total !== 1 ? 's' : ''} to ${owner}/${repo}/${folder || ''}`, 'success');
         } catch (err) {
             setStatus(`Upload failed (${uploaded}/${total}): ${err.message}`, 'error');
         } finally {
